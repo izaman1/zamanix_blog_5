@@ -28,13 +28,24 @@ mongoose.connect(process.env.MONGODB_URI)
   });
 
 // CORS configuration
+const allowedOrigins = process.env.NODE_ENV === 'development'
+  ? ['http://localhost:3000']
+  : ['https://your-production-domain.com']; 
+
 app.use(cors({
-  origin: '*',
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
   maxAge: 86400
 }));
+
 
 // Body parser middleware
 app.use(express.json());
